@@ -1,0 +1,130 @@
+
+services:
+  eureka-server:
+    build: ./movie-services-registry
+    image: movie-service-registry:1.0
+    container_name: eureka-server
+    restart: always
+    ports:
+      - "8761:8761"
+    environment:
+      SERVER_PORT: 8761
+      SPRING_APPLICATION_NAME: movie-services-registry
+      EUREKA_CLIENT_REGISTER_WITH_EUREKA: "false"
+      EUREKA_CLIENT_FETCH_REGISTRY: "false"
+
+  booking-service:
+    build: ./booking-service
+    image: booking-service:1.0
+    container_name: booking-service
+    restart: always
+    ports:
+      - "8081:8081"
+    depends_on:
+      - eureka-server
+    environment:
+      SERVER_PORT: 8081
+      SPRING_APPLICATION_NAME: booking-service
+      EUREKA_CLIENT_REGISTER_WITH_EUREKA: "true"
+      EUREKA_CLIENT_FETCH_REGISTRY: "true"
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: "http://eureka-server:8761/eureka/"
+
+  payment-service:
+    build: ./payment-service
+    image: payment-service:1.0
+    container_name: payment-service
+    restart: always
+    ports:
+      - "8082:8082"
+    depends_on:
+      - eureka-server
+    environment:
+      SERVER_PORT: 8082
+      SPRING_APPLICATION_NAME: payment-service
+      EUREKA_CLIENT_REGISTER_WITH_EUREKA: "true"
+      EUREKA_CLIENT_FETCH_REGISTRY: "true"
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: "http://eureka-server:8761/eureka/"
+
+  notification-service:
+    build: ./notification-service
+    image: notification-service:1.0
+    container_name: notification-service
+    restart: always
+    ports:
+      - "8083:8083"
+    depends_on:
+      - eureka-server
+    environment:
+      SERVER_PORT: 8083
+      SPRING_APPLICATION_NAME: notification-service
+      EUREKA_CLIENT_REGISTER_WITH_EUREKA: "true"
+      EUREKA_CLIENT_FETCH_REGISTRY: "true"
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: "http://eureka-server:8761/eureka/"
+
+  api-gateway:
+    build: ./api-gateway
+    image: api-gateway:1.0
+    container_name: api-gateway
+    restart: always
+    ports:
+      - "8765:8765"
+    depends_on:
+      - eureka-server
+      - notification-service
+      - payment-service
+      - booking-service
+    environment:
+      SERVER_PORT: 8765
+      SPRING_APPLICATION_NAME: api-gateway
+      EUREKA_CLIENT_REGISTER_WITH_EUREKA: "true"
+      EUREKA_CLIENT_FETCH_REGISTRY: "true"
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: "http://eureka-server:8761/eureka/"
+
+
+
+
+#services:
+#  eureka-server:
+#    build: ./movie-services-registry
+#    image: movie-service-registry:1.0
+#    container_name: eureka-server
+#    restart: always
+#    ports:
+#      - "8761:8761"
+#    environment:
+#      -SERVER_PORT: 8761
+#      -spring.application.name: movie-service-registry
+#      -eureka.client.register-with-eureka: false
+#      -eureka.client.fetch-registry: false
+#
+#  booking-service:
+#    build: ./booking-service
+#    image: booking-service
+#    container_name: booking-service
+#    restart: always
+#    ports:
+#     - "8081:8081"
+#    environment:
+#      -server.port: 8081
+#      -spring.application.name: booking-service
+#      -eureka.client.register-with-eureka: true
+#      -eureka.client.fetch-registry: true
+#      -eureka.client.service-url.defaultZone: http://eureka-server:8761/eureka/
+#
+#  payment-service:
+#    build: ./payment-service
+#    image: payment-service
+#    container_name: payment-service
+#    restart: always
+#    ports:
+#      - "8082:8082"
+#    environment:
+#      -server.port: 8082
+#      -spring.application.name: payment-service
+#      -eureka.client.register-with-eureka: true
+#      -eureka.client.fetch-registry: true
+#      -eureka.client.service-url.defaultZone: http://eureka-server:8761/eureka/
+#
+#
+#
+#
