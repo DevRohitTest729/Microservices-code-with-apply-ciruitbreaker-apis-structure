@@ -31,10 +31,18 @@ spring:
               predicates:
                 - Path=/notifications/**
 
-
 eureka:
   client:
     register-with-eureka: ${EUREKA_CLIENT_REGISTER_WITH_EUREKA:true}
     service-url:
       defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://localhost:8761/eureka/}
     fetch-registry: ${EUREKA_CLIENT_FETCH_REGISTRY:true}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+    health:
+      probes:
+        enabled: true

@@ -25,3 +25,22 @@ eureka:
     service-url:
       defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://localhost:8761/eureka/}
     fetch-registry: ${EUREKA_CLIENT_FETCH_REGISTRY:false}
+
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+    health:
+      probes:
+        enabled: true
+
+  health:
+    liveness-state:
+      enabled: true
+    readiness-state:
+      enabled: true
+
+#  endpoints:
+

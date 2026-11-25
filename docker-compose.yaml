@@ -7,6 +7,12 @@ services:
     restart: always
     ports:
       - "8761:8761"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8761/actuator/health/readiness | grep -q UP"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 30s
     environment:
       SERVER_PORT: 8761
       SPRING_APPLICATION_NAME: movie-services-registry
@@ -20,8 +26,15 @@ services:
     restart: always
     ports:
       - "8081:8081"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8081/actuator/health/readiness | grep -q UP"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 40s
     depends_on:
-      - eureka-server
+      eureka-server:
+        condition: service_healthy
     environment:
       SERVER_PORT: 8081
       SPRING_APPLICATION_NAME: booking-service
@@ -36,8 +49,15 @@ services:
     restart: always
     ports:
       - "8082:8082"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8082/actuator/health/readiness | grep -q UP"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 40s
     depends_on:
-      - eureka-server
+      eureka-server:
+        condition: service_healthy
     environment:
       SERVER_PORT: 8082
       SPRING_APPLICATION_NAME: payment-service
@@ -52,8 +72,15 @@ services:
     restart: always
     ports:
       - "8083:8083"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8083/actuator/health/readiness | grep -q UP"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 40s
     depends_on:
-      - eureka-server
+      eureka-server:
+        condition: service_healthy
     environment:
       SERVER_PORT: 8083
       SPRING_APPLICATION_NAME: notification-service
@@ -68,11 +95,21 @@ services:
     restart: always
     ports:
       - "8765:8765"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8765/actuator/health/readiness | grep -q UP"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 40s
     depends_on:
-      - eureka-server
-      - notification-service
-      - payment-service
-      - booking-service
+      eureka-server:
+        condition: service_healthy
+      booking-service:
+        condition: service_healthy
+      payment-service:
+        condition: service_healthy
+      notification-service:
+        condition: service_healthy
     environment:
       SERVER_PORT: 8765
       SPRING_APPLICATION_NAME: api-gateway
@@ -83,6 +120,8 @@ services:
 
 
 
+
+#
 #services:
 #  eureka-server:
 #    build: ./movie-services-registry
@@ -91,40 +130,118 @@ services:
 #    restart: always
 #    ports:
 #      - "8761:8761"
+#    healthcheck:
+#      test: "curl --fail --silent localhost:8761/actuator/health/readiness | grep UP || exit 0"
+#      interval: 10s
+#      timeout: 5s
+#      retries: 6
+#      start_period: 30s
 #    environment:
-#      -SERVER_PORT: 8761
-#      -spring.application.name: movie-service-registry
-#      -eureka.client.register-with-eureka: false
-#      -eureka.client.fetch-registry: false
+#      SERVER_PORT: 8761
+#      SPRING_APPLICATION_NAME: movie-services-registry
+#      EUREKA_CLIENT_REGISTER_WITH_EUREKA: "false"
+#      EUREKA_CLIENT_FETCH_REGISTRY: "false"
+#
 #
 #  booking-service:
 #    build: ./booking-service
-#    image: booking-service
+#    image: booking-service:1.0
 #    container_name: booking-service
 #    restart: always
 #    ports:
-#     - "8081:8081"
+#      - "8081:8081"
+#    healthcheck:
+#      test: "curl --fail --silent localhost:8761/actuator/health/readiness | grep UP || exit 0"
+#      interval: 10s
+#      timeout: 5s
+#      retries: 6
+#      start_period: 30s
+#    depends_on:
+#      eureka-server:
+#        condition: service_healthy
+#
 #    environment:
-#      -server.port: 8081
-#      -spring.application.name: booking-service
-#      -eureka.client.register-with-eureka: true
-#      -eureka.client.fetch-registry: true
-#      -eureka.client.service-url.defaultZone: http://eureka-server:8761/eureka/
+#      SERVER_PORT: 8081
+#      SPRING_APPLICATION_NAME: booking-service
+#      EUREKA_CLIENT_REGISTER_WITH_EUREKA: "true"
+#      EUREKA_CLIENT_FETCH_REGISTRY: "true"
+#      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: "http://eureka-server:8761/eureka/"
+#
+#
 #
 #  payment-service:
 #    build: ./payment-service
-#    image: payment-service
+#    image: payment-service:1.0
 #    container_name: payment-service
 #    restart: always
 #    ports:
 #      - "8082:8082"
+#    healthcheck:
+#      test: "curl --fail --silent localhost:8761/actuator/health/readiness | grep UP || exit 0"
+#      interval: 10s
+#      timeout: 5s
+#      retries: 6
+#      start_period: 30s
+#    depends_on:
+#      eureka-server:
+#        condition: service_healthy
+#
 #    environment:
-#      -server.port: 8082
-#      -spring.application.name: payment-service
-#      -eureka.client.register-with-eureka: true
-#      -eureka.client.fetch-registry: true
-#      -eureka.client.service-url.defaultZone: http://eureka-server:8761/eureka/
+#      SERVER_PORT: 8082
+#      SPRING_APPLICATION_NAME: payment-service
+#      EUREKA_CLIENT_REGISTER_WITH_EUREKA: "true"
+#      EUREKA_CLIENT_FETCH_REGISTRY: "true"
+#      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: "http://eureka-server:8761/eureka/"
 #
+#  notification-service:
+#    build: ./notification-service
+#    image: notification-service:1.0
+#    container_name: notification-service
+#    restart: always
+#    ports:
+#      - "8083:8083"
+#    healthcheck:
+#      test: "curl --fail --silent localhost:8761/actuator/health/readiness | grep UP || exit 0"
+#      interval: 10s
+#      timeout: 5s
+#      retries: 6
+#      start_period: 30s
+#    depends_on:
+#      eureka-server:
+#        condition: service_healthy
+#    environment:
+#      SERVER_PORT: 8083
+#      SPRING_APPLICATION_NAME: notification-service
+#      EUREKA_CLIENT_REGISTER_WITH_EUREKA: "true"
+#      EUREKA_CLIENT_FETCH_REGISTRY: "true"
+#      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: "http://eureka-server:8761/eureka/"
 #
+#  api-gateway:
+#    build: ./api-gateway
+#    image: api-gateway:1.0
+#    container_name: api-gateway
+#    restart: always
+#    ports:
+#      - "8765:8765"
+#    healthcheck:
+#      test: "curl --fail --silent localhost:8761/actuator/health/readiness | grep UP || exit 0"
+#      interval: 10s
+#      timeout: 5s
+#      retries: 6
+#      start_period: 30s
+#    depends_on:
+#      eureka-server:
+#       condition: service_healthy
+#      notification-service:
+#        condition: service_healthy
+#      payment-service:
+#        condition: service_healthy
+#      booking-service:
+#        condition: service_healthy
 #
-#
+#    environment:
+#      SERVER_PORT: 8765
+#      SPRING_APPLICATION_NAME: api-gateway
+#      EUREKA_CLIENT_REGISTER_WITH_EUREKA: "true"
+#      EUREKA_CLIENT_FETCH_REGISTRY: "true"
+#      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: "http://eureka-server:8761/eureka/"
