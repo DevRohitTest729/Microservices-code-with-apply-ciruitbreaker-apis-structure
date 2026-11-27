@@ -5,8 +5,8 @@ services:
     image: movie-service-registry:1.0
     container_name: eureka-server
     restart: always
-#    ports:
-#      - "8761:8761"
+    ports:
+      - "8761:8761"
     healthcheck:
       test: ["CMD-SHELL", "curl -fsS http://localhost:8761/actuator/health/readiness | grep -q UP"]
       interval: 10s
@@ -35,6 +35,11 @@ services:
     depends_on:
       eureka-server:
         condition: service_healthy
+      api-gateway:
+        condition: service_healthy
+      payment-service:
+        condition: service_healthy
+
     environment:
       SERVER_PORT: 8081
       SPRING_APPLICATION_NAME: booking-service
@@ -81,6 +86,8 @@ services:
     depends_on:
       eureka-server:
         condition: service_healthy
+      payment-service:
+        condition: service_healthy
     environment:
       SERVER_PORT: 8083
       SPRING_APPLICATION_NAME: notification-service
@@ -104,18 +111,48 @@ services:
     depends_on:
       eureka-server:
         condition: service_healthy
-      booking-service:
-        condition: service_healthy
-      payment-service:
-        condition: service_healthy
-      notification-service:
-        condition: service_healthy
+
     environment:
       SERVER_PORT: 8765
       SPRING_APPLICATION_NAME: api-gateway
       EUREKA_CLIENT_REGISTER_WITH_EUREKA: "true"
       EUREKA_CLIENT_FETCH_REGISTRY: "true"
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: "http://eureka-server:8761/eureka/"
+
+  mysql_payment:
+    image: mysql:latest
+    container_name: mysql_payments
+    ports:
+      - "3307:3306"
+    restart: always
+    environment:
+      MYSQL_USER: payments
+      MYSQL_PASSWORD: admin
+      MYSQL_DATABASE: payments
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_PORT: 3307
+    volumes:
+      - payment_mysql_data:/var/lib/mysql
+
+  mysql_booking:
+    image: mysql:latest
+    container_name: mysql_bookings
+    ports:
+      - "3308:3306"
+    restart: always
+    environment:
+      MYSQL_USER: bookings
+      MYSQL_PASSWORD: admin
+      MYSQL_DATABASE: bookings
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_PORT: 3308
+    volumes:
+      - booking_mysql_data:/var/lib/mysql
+volumes:
+  - payment_mysql_data:
+  - booking_mysql_data:
+
+
 
 
 

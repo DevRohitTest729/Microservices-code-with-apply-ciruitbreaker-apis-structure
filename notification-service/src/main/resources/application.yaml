@@ -39,3 +39,9 @@ management:
     health:
       probes:
         enabled: true
+
+  health:
+    liveness-state:
+      enabled: true
+    readiness-state:
+      enabled: true

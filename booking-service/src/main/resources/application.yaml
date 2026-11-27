@@ -1,24 +1,25 @@
-#server:
-#  port: 8081
-#
-#spring:
-#  application:
-#    name: booking-service
-#
-#eureka:
-#  client:
-#    register-with-eureka: true
-#    service-url:
-#      defaultZone: http://localhost:8761/eureka/
-#    fetch-registry: true
 
 
 server:
   port: ${SERVER_PORT:8081}
 
 spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${mysql_booking:localhost}:${MYSQL_PORT:3306}/${MYSQL_DATABASE:bookings?createDatabaseIfNotExist=true}
+    username: ${MYSQL_USER:root}
+    password: ${MYSQL_PASSWORD:admin}
   application:
     name: ${SPRING_APPLICATION_NAME:booking-service}
+  jpa:
+    hibernate:
+      properties:
+        hibernate:
+          format_sql: 'true'
+      show-sql: 'true'
+      ddl-auto: create
+    database-platform: org.hibernate.dialect.MySQLDialect
+
 
 eureka:
   client:
@@ -35,3 +36,9 @@ management:
     health:
       probes:
         enabled: true
+
+  health:
+    liveness-state:
+      enabled: true
+    readiness-state:
+      enabled: true

@@ -4,6 +4,23 @@ server:
 spring:
   application:
     name: ${SPRING_APPLICATION_NAME:payment-service}
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${mysql_booking:localhost}:${MYSQL_PORT:3306}/${MYSQL_DATABASE:payments?createDatabaseIfNotExist=true}
+    username: ${MYSQL_USER:root}
+    password: ${MYSQL_PASSWORD:admin}
+  jpa:
+    hibernate:
+      properties:
+        hibernate:
+          format_sql: 'true'
+      show-sql: 'true'
+      ddl-auto: create
+    database-platform: org.hibernate.dialect.MySQLDialect
+
+
+
+
 
 eureka:
   client:
@@ -22,17 +39,11 @@ management:
       probes:
         enabled: true
 
-#server:
-#  port: 8082
-#
-#spring:
-#  application:
-#    name: payment-service
-#
-#
-#eureka:
-#  client:
-#    register-with-eureka: true
-#    service-url:
-#      defaultZone: http://localhost:8761/eureka/
-#    fetch-registry: true
+  health:
+    liveness-state:
+      enabled: true
+    readiness-state:
+      enabled: true
+
+stripe:
+  secretKye: 85430985
